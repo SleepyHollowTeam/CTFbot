@@ -1,0 +1,5 @@
+{
+    "require_role" : 1,
+    "require_role_name" : "ActiveCTF",
+    "ctf_channels" : ["rev", "pwn","crypto","web","forensic","misc","hardware","web3","osing","mobile","radio","other"]
+}

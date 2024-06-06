@@ -1,0 +1,5 @@
+appconfig.json
+__pycache__
+*.pyc
+.discord-token
+ctfbot.egg-info
