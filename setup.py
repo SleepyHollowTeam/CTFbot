@@ -5,10 +5,10 @@ import os
 setup(
     name="ctfbot",
     packages=find_packages('.'), 
-    version='1.0.0',
+    version='1.1.0',
     license='MIT',
     description='discord bot for managing ctf',
-    author='mirasio', 
+    author='mirasio, k4ndar3c', 
     install_requires=[],
     classifiers=[],
     entry_points="libctf:main"

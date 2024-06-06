@@ -29,28 +29,27 @@ def add_new_appconfig(ressource_dir) -> dict:
         r = input(">")
         match r:
             case 'Y' | 'y':
-                appconfig['require_role'] = 0
+                pass
             case 'N' | 'n':
-                appconfig['require_role'] = 1                
+                print("Name the role required to join CTF room")
+                appconfig['require_role_name'] = input(">")
+                print("Enter password to join CTF")
+                appconfig["ctf_password"] = input(">")
+            case default:
+                print("Invalid response, Restarting")
+                add_new_appconfig(ressource_dir)          
+
+        print("Will all users will be able to use CTFBot admin command (/create_ctf, ...) ? (Y/N)")
+        r = input(">")
+        match r:
+            case 'Y' | 'y':
+                pass
+            case 'N' | 'n':
+                print("Name the role required to use CTFBot command")
+                appconfig['require_role_cmd_name'] = input(">")
             case default:
                 print("Invalid response, Restarting")
                 add_new_appconfig(ressource_dir)
-
-        if appconfig['require_role']:
-            print("Name the role required to join CTF room")
-            r = input(">")
-            appconfig['require_role_name'] = r
-
-        # print("Do you want channels to be forum? ? (Y/N)")
-        # r = input(">")
-        # match r:
-        #     case 'Y' | 'y':
-        #         appconfig['forum'] = 1
-        #     case 'N' | 'n':
-        #         appconfig['forum'] = 0             
-        #     case default:
-        #         print("Invalid response, Restarting")
-        #         add_new_appconfig(ressource_dir)
 
         print("Those channels will be created in the ctf")
         for chan in ctf_channels_default:

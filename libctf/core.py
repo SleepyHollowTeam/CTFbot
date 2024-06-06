@@ -2,6 +2,10 @@ from pathlib import Path
 import discord
 from os import makedirs
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+
 from discord import app_commands
 
 from .handler import Handler
@@ -29,14 +33,17 @@ class CTFBot():
         print("Appconfig registered")
 
     @property
-    def require_role(self) -> bool:
-        return self.appconfig.get("require_role", False)
-    @property
     def require_role_name(self) -> str:
         return self.appconfig.get("require_role_name",None)
     @property
+    def require_role_cmd_name(self) -> str:
+        return self.appconfig.get("require_role_cmd_name",None)
+    @property
     def ctf_channels(self) -> list:
-        return self.appconfig.get("ctf_channels",["base"])
+        return self.appconfig.get("ctf_channels",["CTF-Information"])
+    @property
+    def ctf_password(self) -> list:
+        return self.appconfig.get("ctf_password",None)
 
     def register_app_token(self) -> None:
         def add_new_token():
@@ -63,11 +70,8 @@ class CTFBot():
 
     
     def start(self) -> None:
-        intents = discord.Intents.default()
-        intents.message_content = True
-        intents.guilds = True
-        intents.guilds = True
-        client = DiscordClient(intents=intents)       
+        intents = discord.Intents.all()
+        client = DiscordClient(intents=intents)
         self.handler = Handler(client, self)
         client.run(self.token)
 
@@ -75,6 +79,6 @@ class CTFBot():
 def main():
     bot = CTFBot()
     bot.start()
-    
+
 if __name__ == '__main__':
     main()
