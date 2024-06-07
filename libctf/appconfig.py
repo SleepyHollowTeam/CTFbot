@@ -2,7 +2,7 @@ from os import makedirs
 from pathlib import Path
 import json
 
-ctf_channels_default = ["rev", "pwn","crypto","web","forensic","misc","hardware","web3","osing","mobile","radio","other"]
+ctf_channels_default = ["rev","pwn","crypto","web","forensic","misc","hardware","web3","osint","mobile","radio","other"]
 
 def register_new_channels():
     print("Please enter channel in the order you want like this : channel1,channel2,channel3")

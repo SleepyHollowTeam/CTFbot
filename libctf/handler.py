@@ -7,6 +7,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from .ctftime import get_ctftime_informations
+from .ctfd_parser import dump_ctfd
 
 class Handler():
     def __init__(self, client: commands.Bot, ctfbot) -> None:
@@ -57,6 +58,85 @@ class Handler():
         @app_commands.describe()
         async def unregister_command(interaction: discord.Interaction):
             await self.unregister(interaction)
+
+        @self.ctfclient.tree.command(
+            name="get_ctfd",
+            description="Get an online CTFd and create category for it"
+        )
+        @app_commands.describe(ctf_url="The url of the CTFd",
+                               user="login",
+                               password="password")
+        async def get_ctfd(interaction: discord.Interaction, ctf_url: str, user: str, password: str):
+            await self.get_ctfd(interaction, ctf_url, user, password)
+
+
+    async def get_ctfd(self, interaction: discord.Interaction, ctf_url: str, user: str, password: str):
+        
+        guild = interaction.guild
+        channel = interaction.channel
+
+        if self.ctfbot.require_role_cmd_name:
+            is_admin = discord.utils.get(guild.roles, name=self.ctfbot.require_role_cmd_name)
+            if not is_admin:
+                await interaction.response.send_message(f'Required role ({self.ctfbot.require_role_cmd_name}) for creating CTF not found. Are you sure this role exists?', ephemeral=True)
+                return
+            
+            can_run = False
+            for role in interaction.user.roles:
+                if self.ctfbot.require_role_cmd_name == role.name:
+                    can_run = True
+            if not can_run:
+                await interaction.response.send_message(f'You do not have the required role ({self.ctfbot.require_role_cmd_name}) to create a CTF.', ephemeral=True)
+                return
+            
+        overwrites = None
+        if self.ctfbot.require_role_name:
+            active_ctf_role = discord.utils.get(guild.roles, name=self.ctfbot.require_role_name)
+            if not active_ctf_role:
+                await interaction.response.send_message(f'Required role ({self.ctfbot.require_role_name}) for CTF room not found. Are you sure this role exists?', ephemeral=True)
+                return
+
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(view_channel=False),
+                active_ctf_role: discord.PermissionOverwrite(view_channel=True)
+            }
+        
+        if "//" in ctf_url:
+            ctf_name = ctf_url.split("//")[1].rstrip('/')
+        else:
+            ctf_name = ctf_url.rstrip('/')
+        category = discord.utils.get(guild.categories, name=ctf_name)
+
+        if not category:
+
+            challs, challs_data = await dump_ctfd(ctf_url, user, password)
+            if not challs:
+                await interaction.response.send_message(f"[-] Can't connect to {ctf_url} with login {user}/{password}")
+                return
+            challs = challs['data']
+            cats = set([x['category'] for x in challs])
+            
+            category = await guild.create_category(ctf_name, overwrites=overwrites)
+ 
+            for cat_name in cats:
+                try:
+                    chan = await guild.create_text_channel(cat_name, category=category, overwrites=overwrites)
+                    names = set([x['name'] for x in challs if x['category'] == cat_name])
+                    for n in names:
+                        message = await chan.send(f"Thread **{n}**")
+                        thread = await message.create_thread(name=f"**{n}**")
+                        for data in challs_data:
+                            if data[0] == n:
+                                await thread.send(data[1])
+                                if data[2]:
+                                    await thread.send(file=discord.File(data[2]))
+                except Exception as e:
+                    print(e)
+
+            await channel.send(f'ctf {ctf_name} fully download.')
+        else:
+            await channel.send(f'Category "{ctf_name}" already exists.')
+
 
     async def create_ctf(self, interaction: discord.Interaction, ctf_name: str, ctftime:str = None):
         

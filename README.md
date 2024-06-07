@@ -26,7 +26,7 @@ In ressource/template-appconfig.json:
 {
     "require_role_name" : "ActiveCTF",
     "require_role_cmd_name" : "Administrator",
-    "ctf_channels" : ["rev", "pwn","crypto","web","forensic","misc","hardware","web3","osing","mobile","radio","other"],
+    "ctf_channels" : ["rev","pwn","crypto","web","forensic","misc","hardware","web3","osint","mobile","radio","other"],
     "ctfpassword" : "dummypassword"
 }
 ```
