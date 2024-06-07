@@ -13,6 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 import shutil
 import asyncio
+from bs4 import BeautifulSoup as bs
 
 ROOT = os.path.dirname(__file__)
 
@@ -116,9 +117,9 @@ class CTFdParser(object):
             res += f"**Points** : {challenge['value']}\n\n"
 
             chall_json = self.get_challenge_by_id(challenge["id"])["data"]
-            f.write(f"{chall_json['description']}\n\n")
-            res += f"{chall_json['description']}\n\n"
-            #print(chall_json['files'])
+            description = bs(chall_json['description'], 'html.parser').get_text(separator="\n")
+            f.write(f"{description}\n\n")
+            res += f"{description}\n\n"
 
             connection_info = chall_json["connection_info"]
             if connection_info is not None:

@@ -39,9 +39,9 @@ In ressource/template-appconfig.json:
 ## Admin commands : 
 
 - /create_ctf [CTFNAME] + Optionnal : [CTFTIME_EVENT_URL] [CTFD_API_URL:CTFD_USERNAME:CTFD_PASSWORD]
-    * if no ctfd is given, will create a list of channels based on ctf_channels in appconfig.json
+    * will create a list of channels based on ctf_channels in appconfig.json
     * if ctftime event url is given, will create ctf-information channel with ctftime information
-    * (todo) if ctfd url + valid user/password is given, will create channels based on ctfd categories and the associated challenges in threads.
+- /get_ctfd [CTF_URL] [LOGIN] [PASS] : downloads the description and files for all categories of an online ctfd
 - /delete_ctf [CTFNAME] : Delete the category [CTFNAME] and all of the channels
 - /unregister : Remove `require_role_name` from all users
 - /link_ctftime [CTFNAME] [CTFTIME_EVENT_URL] : Update or add ctftime information to ctf-information channel
