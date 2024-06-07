@@ -8,6 +8,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 from .ctftime import get_ctftime_informations
 from .ctfd_parser import dump_ctfd
+from .selenium_firefox import take_screenshot
+from .utils import *
 
 class Handler():
     def __init__(self, client: commands.Bot, ctfbot) -> None:
@@ -65,12 +67,61 @@ class Handler():
         )
         @app_commands.describe(ctf_url="The url of the CTFd",
                                user="login",
-                               password="password")
-        async def get_ctfd(interaction: discord.Interaction, ctf_url: str, user: str, password: str):
-            await self.get_ctfd(interaction, ctf_url, user, password)
+                               password="password",
+                               update="Optional: update new challs")
+        async def get_ctfd(interaction: discord.Interaction, ctf_url: str, user: str, password: str, update: bool = False):
+            await self.get_ctfd(interaction, ctf_url, user, password, update)
+
+        @self.ctfclient.tree.command(
+            name="next_ctfs",
+            description="Get a list of incoming ctfs"
+        )
+        @app_commands.describe(quantity="Optional: How many (default 15)")
+        async def next_ctfs(interaction: discord.Interaction, quantity:int = 15):
+            await self.next_ctfs(interaction, quantity)
+
+        @self.ctfclient.tree.command(
+            name="clean",
+            description="Delete last messages"
+        )
+        @app_commands.describe(quantity="Optional: How many (default 15)")
+        async def clean(interaction: discord.Interaction, quantity:int = 15):
+            await self.clean(interaction, quantity)
+
+        @self.ctfclient.tree.command(
+            name="ping",
+            description="Simple ping/pong"
+        )
+        @app_commands.describe()
+        async def ping(interaction: discord.Interaction):
+            await self.ping(interaction)
+
+        @self.ctfclient.tree.command(
+            name="get_score",
+            description="Get a screenshot of a team's page"
+        )
+        @app_commands.describe(team_url="The url of the team")
+        async def get_score(interaction: discord.Interaction, team_url: str):
+            await self.get_score(interaction, team_url)
+
+    async def get_score(self, interaction: discord.Interaction, team_url: str):
+        chan = interaction.channel
+        await take_screenshot(team_url)
+        await chan.send(file=discord.File("team_score.png"))
+
+    async def ping(self, interaction: discord.Interaction):
+        await interaction.response.send_message("I'm up !")
+    
+    async def clean(self, interaction: discord.Interaction, quantity:int = 15):
+        async for msg in interaction.channel.history(limit=quantity+1):
+            await msg.delete()
+            await asyncio.sleep(.5)
+
+    async def next_ctfs(self, interaction: discord.Interaction, quantity:int = 15):
+        await interaction.response.send_message("```{}```".format(get_next_ctfs(quantity)))
 
 
-    async def get_ctfd(self, interaction: discord.Interaction, ctf_url: str, user: str, password: str):
+    async def get_ctfd(self, interaction: discord.Interaction, ctf_url: str, user: str, password: str, update: bool = False):
         
         guild = interaction.guild
         channel = interaction.channel
@@ -107,7 +158,7 @@ class Handler():
             ctf_name = ctf_url.rstrip('/')
         category = discord.utils.get(guild.categories, name=ctf_name)
 
-        if not category:
+        if not category or update:
 
             challs, challs_data = await dump_ctfd(ctf_url, user, password)
             if not challs:
@@ -116,20 +167,27 @@ class Handler():
             challs = challs['data']
             cats = set([x['category'] for x in challs])
             
-            category = await guild.create_category(ctf_name, overwrites=overwrites)
+            if not update:
+                category = await guild.create_category(ctf_name, overwrites=overwrites)
  
             for cat_name in cats:
+                local_cat_name = "ctf-"+cat_name.lower().replace(' ', '-')
                 try:
-                    chan = await guild.create_text_channel(cat_name, category=category, overwrites=overwrites)
+                    chan = discord.utils.get(guild.channels, name=local_cat_name)
+                    if not chan:
+                        chan = await guild.create_text_channel(local_cat_name, category=category, overwrites=overwrites)
+
                     names = set([x['name'] for x in challs if x['category'] == cat_name])
                     for n in names:
-                        message = await chan.send(f"Thread **{n}**")
-                        thread = await message.create_thread(name=f"**{n}**")
-                        for data in challs_data:
-                            if data[0] == n:
-                                await thread.send(data[1])
-                                if data[2]:
-                                    await thread.send(file=discord.File(data[2]))
+                        thread = discord.utils.get(chan.threads, name=f"**{n}**")
+                        if not thread:
+                            message = await chan.send(f"Thread **{n}**")
+                            thread = await message.create_thread(name=f"**{n}**")
+                            for data in challs_data:
+                                if data[0] == n:
+                                    await thread.send(data[1])
+                                    if data[2]:
+                                        await thread.send(file=discord.File(data[2]))
                 except Exception as e:
                     print(e)
 
