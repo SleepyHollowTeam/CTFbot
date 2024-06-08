@@ -82,7 +82,7 @@ class Handler():
 
         @self.ctfclient.tree.command(
             name="clean",
-            description="Delete last messages"
+            description="Delete last messages in channel"
         )
         @app_commands.describe(quantity="Optional: How many (default 15)")
         async def clean(interaction: discord.Interaction, quantity:int = 15):
@@ -106,14 +106,19 @@ class Handler():
 
     async def get_score(self, interaction: discord.Interaction, team_url: str):
         chan = interaction.channel
-        await take_screenshot(team_url)
-        await chan.send(file=discord.File("team_score.png"))
+        if '/teams/' not in team_url.lower():
+            interaction.response.send_message("Can't scrape the web :)")
+        r = await take_screenshot(team_url)
+        if r:
+            await chan.send(file=discord.File("team_score.png"))
+        else:
+            await chan.send(f'[-] request "{team_url}" failed')
 
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("I'm up !")
     
     async def clean(self, interaction: discord.Interaction, quantity:int = 15):
-        async for msg in interaction.channel.history(limit=quantity+1):
+        async for msg in interaction.channel.history(limit=quantity):
             await msg.delete()
             await asyncio.sleep(.5)
 

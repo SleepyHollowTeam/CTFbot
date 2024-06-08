@@ -67,6 +67,4 @@ python3 -m ctfbot
 
 ## TODO
 
-- appconfig:maxctfd_weight_upload
 - bettername for `require_role_name`, `require_role_cmd_name`
-- ctfd full feature

@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup as bs
 
 ROOT = os.path.dirname(__file__)
 
-FILE_MAX_SIZE_MO = 15 
+FILE_MAX_SIZE_MO = 15    # discord accepts <= 25
 
 def os_filename_sanitize(s:str) -> str:
     filtred = ['/', ';', ' ', ':']
@@ -86,8 +86,6 @@ class CTFdParser(object):
 
             challs_of_category = [c for c in self.challenges if c['category'] == category]
 
-            # Waits for all the threads to be completed
-            #with ThreadPoolExecutor(max_workers=min(threads, len(challs_of_category))) as tp:
             for challenge in challs_of_category:
                 chall, res, fname = await self.dump_challenge(category, challenge)
                 resp.append((chall, res, fname))
@@ -121,15 +119,8 @@ class CTFdParser(object):
             f.write(f"{description}\n\n")
             res += f"{description}\n\n"
 
-            connection_info = chall_json["connection_info"]
-            if connection_info is not None:
-                if len(connection_info) != 0:
-                    f.write(f"{connection_info}\n\n")
-                    res += f"{connection_info}\n\n"
-
             # Get challenge files
             if len(chall_json["files"]) != 0:
-                f.write("## Files : \n")
                 for file_url in chall_json["files"]:
                     if "?" in file_url:
                         filename = os.path.basename(file_url.split('?')[0])
@@ -139,7 +130,7 @@ class CTFdParser(object):
                     r = self.session.head(self.target + file_url, allow_redirects=True)
                     if "Content-Length" in r.headers.keys():
                         size = int(r.headers["Content-Length"])
-                        if size < (FILE_MAX_SIZE_MO * 1024 * 1024):  # 50 Mb
+                        if size < (FILE_MAX_SIZE_MO * 1024 * 1024):
                             r = self.session.get(self.target + file_url, stream=True)
                             fname = folder + os.path.sep + filename
                             with open(folder + os.path.sep + filename, "wb") as fdl:
@@ -147,16 +138,22 @@ class CTFdParser(object):
                                     fdl.write(chunk)
                         else:
                             print(f"Not Downloading {filename}, filesize too big.")
-
+                            f.write(f"File: {self.target + file_url}\n\n")
+                            res += f"File: {self.target + file_url}\n\n"
                     else:
-                        r = self.session.get(self.target + file_url, stream=True)
-                        with open(folder + os.path.sep + filename, "wb") as fdl:
-                            for chunk in r.iter_content(chunk_size=16 * 1024):
-                                fdl.write(chunk)
+                        f.write(f"File: {self.target + file_url}\n\n")
+                        res += f"File: {self.target + file_url}\n\n"
+                    #    r = self.session.get(self.target + file_url, stream=True)
+                    #    with open(folder + os.path.sep + filename, "wb") as fdl:
+                    #        for chunk in r.iter_content(chunk_size=16 * 1024):
+                    #            fdl.write(chunk)
 
-                    f.write(f" - [{filename}](./{filename})\n")
+            connection_info = chall_json["connection_info"]
+            if connection_info is not None:
+                if len(connection_info) != 0:
+                    f.write(f"{connection_info}\n\n")
+                    res += f"{connection_info}\n\n"
 
-            f.write("\n\n")
             f.close()
             return challenge['name'], res, fname
         except Exception as e:

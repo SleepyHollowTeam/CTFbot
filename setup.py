@@ -7,7 +7,7 @@ setup(
     packages=find_packages('.'), 
     version='1.1.0',
     license='MIT',
-    description='discord bot for managing ctf',
+    description='discord bot for managing ctfs',
     author='mirasio, k4ndar3c', 
     install_requires=[],
     classifiers=[],
