@@ -1,1 +1,5 @@
 discord.py
+bs4
+selenium
+webdriver_manager
+feedparser
