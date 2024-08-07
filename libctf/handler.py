@@ -104,6 +104,14 @@ class Handler():
         async def get_score(interaction: discord.Interaction, team_url: str):
             await self.get_score(interaction, team_url)
 
+        @self.ctfclient.tree.command(
+            name="infos",
+            description="Show links about SH"
+        )
+        @app_commands.describe()
+        async def infos(interaction: discord.Interaction):
+            await self.infos(interaction)
+
     async def get_score(self, interaction: discord.Interaction, team_url: str):
         chan = interaction.channel
         if '/teams/' not in team_url.lower():
@@ -117,6 +125,10 @@ class Handler():
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("I'm up !")
     
+    async def infos(self, interaction: discord.Interaction):
+        urls = ["https://ctftime.org/team/282180", "https://sleepyhollow.netlify.app/", "https://github.com/SleepyHollowTeam"]
+        await interaction.response.send_message(f"<{urls[0]}>\n<{urls[1]}>\n<{urls[2]}>")
+
     async def clean(self, interaction: discord.Interaction, quantity:int = 15):
         async for msg in interaction.channel.history(limit=quantity):
             await msg.delete()
