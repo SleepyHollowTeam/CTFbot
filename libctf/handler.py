@@ -126,8 +126,8 @@ class Handler():
         await interaction.response.send_message("I'm up !")
     
     async def infos(self, interaction: discord.Interaction):
-        urls = ["https://ctftime.org/team/282180", "https://sleepyhollow.netlify.app/", "https://github.com/SleepyHollowTeam"]
-        await interaction.response.send_message(f"<{urls[0]}>\n<{urls[1]}>\n<{urls[2]}>")
+        urls = ["https://ctftime.org/team/282180", "https://sleepyhollow.netlify.app/", "https://github.com/SleepyHollowTeam", "https://x.com/SleepyHollowCTF"]
+        await interaction.response.send_message(f"<{urls[0]}>\n<{urls[1]}>\n<{urls[2]}>\n<{urls[3]}>")
 
     async def clean(self, interaction: discord.Interaction, quantity:int = 15):
         async for msg in interaction.channel.history(limit=quantity):
