@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-import asyncio
+import asyncio, json
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -124,6 +124,12 @@ class Handler():
 
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("I'm up !")
+
+    async def button_command(self, interaction):
+        view = ActivateButton(self.ctf_name, self.join_ctf)
+        channel = discord.utils.get(interaction.guild.text_channels, name="bot-cmd")
+        if channel is not None:
+            await channel.send(f"**-> To join {self.ctf_name}**", view=view)
     
     async def infos(self, interaction: discord.Interaction):
         urls = ["https://ctftime.org/team/282180", "https://sleepyhollow.netlify.app/", "https://github.com/SleepyHollowTeam", "https://x.com/SleepyHollowCTF"]
@@ -210,11 +216,16 @@ class Handler():
 
             await channel.send(f'ctf {ctf_name} fully download.')
         else:
-            await channel.send(f'Category "{ctf_name}" already exists.')
+            await channel.send(f'Category {ctf_name} already exists.')
+        
+        if not update:
+            self.ctf_name = ctf_name
+            await self.button_command(interaction)
 
 
     async def create_ctf(self, interaction: discord.Interaction, ctf_name: str, ctftime:str = None):
         
+        self.ctf_name = ctf_name
         guild = interaction.guild
         err=None
 
@@ -246,7 +257,7 @@ class Handler():
 
         existing_category = discord.utils.get(guild.categories, name=ctf_name)
         if existing_category:
-            await interaction.response.send_message(f"CTF '{ctf_name}' already exists.")
+            await interaction.response.send_message(f"CTF {ctf_name} already exists.")
             return
 
         category = await guild.create_category(ctf_name, overwrites=overwrites)
@@ -266,6 +277,8 @@ class Handler():
             await interaction.response.send_message(f'CTF {ctf_name} has been created!')
         else:
             await interaction.response.send_message(f'CTF {ctf_name} has been created but errors occured : ERR={err}')
+        
+        await self.button_command(interaction)
 
 
     async def link_ctftime(self, interaction: discord.Interaction, ctf_name: str, ctftime:str):
@@ -410,3 +423,17 @@ class Handler():
                 await interaction.followup.send(f'Failed to remove role from {member.display_name}: {e}', ephemeral=True)
 
         await interaction.response.send_message(f'The role {self.ctfbot.require_role_name} has been removed from all users.', ephemeral=True)
+
+
+class ActivateButton(discord.ui.View):
+    def __init__(self, args, func):
+        self.name = args
+        self.func = func
+        super().__init__(timeout=172800)
+
+    @discord.ui.button(label="Join ActiveCTF", style=discord.ButtonStyle.primary)
+    async def execute_command(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self.func(interaction, self.name, json.load(open('ressource/appconfig.json','r'))['ctf_password'])
+        #await interaction.response.send_message(f'You have role ActiveCTF !', ephemeral=True)
+
+
