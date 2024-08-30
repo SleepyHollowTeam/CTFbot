@@ -112,6 +112,15 @@ class Handler():
         async def infos(interaction: discord.Interaction):
             await self.infos(interaction)
 
+        @self.ctfclient.tree.command(
+            name="make_button",
+            description="Create a button to auto join a ctf"
+        )
+        @app_commands.describe(name="CTF name")
+        async def make_button(interaction: discord.Interaction, name: str):
+            self.name = name
+            await self.button_command(interaction)
+    
     async def get_score(self, interaction: discord.Interaction, team_url: str):
         chan = interaction.channel
         if '/teams/' not in team_url.lower():
@@ -127,7 +136,7 @@ class Handler():
 
     async def button_command(self, interaction):
         view = ActivateButton(self.ctf_name, self.join_ctf)
-        channel = discord.utils.get(interaction.guild.text_channels, name="bot-cmd")
+        channel = discord.utils.get(interaction.guild.text_channels, name="planningctf")
         if channel is not None:
             await channel.send(f"**-> To join {self.ctf_name}**", view=view)
     
