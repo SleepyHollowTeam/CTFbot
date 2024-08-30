@@ -118,7 +118,7 @@ class Handler():
         )
         @app_commands.describe(name="CTF name")
         async def make_button(interaction: discord.Interaction, name: str):
-            self.name = name
+            self.ctf_name = name
             await self.button_command(interaction)
     
     async def get_score(self, interaction: discord.Interaction, team_url: str):
@@ -136,7 +136,7 @@ class Handler():
 
     async def button_command(self, interaction):
         view = ActivateButton(self.ctf_name, self.join_ctf)
-        channel = discord.utils.get(interaction.guild.text_channels, name="planningctf")
+        channel = discord.utils.get(interaction.guild.text_channels, name="planning-ctf")
         if channel is not None:
             await channel.send(f"**-> To join {self.ctf_name}**", view=view)
     
