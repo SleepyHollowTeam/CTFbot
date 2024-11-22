@@ -2,7 +2,7 @@ from os import makedirs
 from pathlib import Path
 import json
 
-ctf_channels_default = ["rev","pwn","crypto","web","forensic","misc","hardware","web3","osint","mobile","radio","other"]
+ctf_channels_default = ["crypto", "rev", "pwn", "web", "forensic", "misc"]
 
 def register_new_channels():
     print("Please enter channel in the order you want like this : channel1,channel2,channel3")
@@ -37,7 +37,7 @@ def add_new_appconfig(ressource_dir) -> dict:
                 appconfig["ctf_password"] = input(">")
             case default:
                 print("Invalid response, Restarting")
-                add_new_appconfig(ressource_dir)          
+                add_new_appconfig(ressource_dir)
 
         print("Will all users will be able to use CTFBot admin command (/create_ctf, ...) ? (Y/N)")
         r = input(">")
@@ -54,7 +54,7 @@ def add_new_appconfig(ressource_dir) -> dict:
         print("Those channels will be created in the ctf")
         for chan in ctf_channels_default:
             print(f"-> {chan}")
-        
+
         print("Would you like to modify ? (Y/N)")
         r = input(">")
         match r:
@@ -62,7 +62,7 @@ def add_new_appconfig(ressource_dir) -> dict:
                 channels = register_new_channels()
                 appconfig["ctf_channels"] = channels
             case 'N' | 'n':
-                appconfig["ctf_channels"] = ctf_channels_default   
+                appconfig["ctf_channels"] = ctf_channels_default
             case default:
                 print("Invalid response, Restarting")
                 add_new_appconfig(ressource_dir)
@@ -74,7 +74,7 @@ def add_new_appconfig(ressource_dir) -> dict:
         return appconfig
 
 def register_appconfig(ressource_dir : Path) -> dict:
-    
+
     if not ressource_dir.exists():
         return add_new_appconfig(ressource_dir)
 
