@@ -120,7 +120,7 @@ class Handler():
         async def make_button(interaction: discord.Interaction, name: str):
             self.ctf_name = name
             await self.button_command(interaction)
-    
+
     async def get_score(self, interaction: discord.Interaction, team_url: str):
         chan = interaction.channel
         if '/teams/' not in team_url.lower():
@@ -139,7 +139,7 @@ class Handler():
         channel = discord.utils.get(interaction.guild.text_channels, name="planning-ctf")
         if channel is not None:
             await channel.send(f"**-> To join {self.ctf_name}**", view=view)
-    
+
     async def infos(self, interaction: discord.Interaction):
         urls = ["https://ctftime.org/team/282180", "https://sleepyhollow.netlify.app/", "https://github.com/SleepyHollowTeam", "https://x.com/SleepyHollowCTF"]
         await interaction.response.send_message(f"<{urls[0]}>\n<{urls[1]}>\n<{urls[2]}>\n<{urls[3]}>")
@@ -154,7 +154,7 @@ class Handler():
 
 
     async def get_ctfd(self, interaction: discord.Interaction, ctf_url: str, user: str, password: str, update: bool = False):
-        
+
         guild = interaction.guild
         channel = interaction.channel
 
@@ -163,7 +163,7 @@ class Handler():
             if not is_admin:
                 await interaction.response.send_message(f'Required role ({self.ctfbot.require_role_cmd_name}) for creating CTF not found. Are you sure this role exists?', ephemeral=True)
                 return
-            
+
             can_run = False
             for role in interaction.user.roles:
                 if self.ctfbot.require_role_cmd_name == role.name:
@@ -171,7 +171,7 @@ class Handler():
             if not can_run:
                 await interaction.response.send_message(f'You do not have the required role ({self.ctfbot.require_role_cmd_name}) to create a CTF.', ephemeral=True)
                 return
-            
+
         overwrites = None
         if self.ctfbot.require_role_name:
             active_ctf_role = discord.utils.get(guild.roles, name=self.ctfbot.require_role_name)
@@ -183,7 +183,7 @@ class Handler():
                 guild.default_role: discord.PermissionOverwrite(view_channel=False),
                 active_ctf_role: discord.PermissionOverwrite(view_channel=True)
             }
-        
+
         if "//" in ctf_url:
             ctf_name = ctf_url.split("//")[1].rstrip('/')
         else:
@@ -198,10 +198,10 @@ class Handler():
                 return
             challs = challs['data']
             cats = set([x['category'] for x in challs])
-            
+
             if not update:
                 category = await guild.create_category(ctf_name, overwrites=overwrites)
- 
+
             for cat_name in cats:
                 local_cat_name = "ctf-"+cat_name.lower().replace(' ', '-')
                 try:
@@ -226,14 +226,14 @@ class Handler():
             await channel.send(f'ctf {ctf_name} fully download.')
         else:
             await channel.send(f'Category {ctf_name} already exists.')
-        
+
         if not update:
             self.ctf_name = ctf_name
             await self.button_command(interaction)
 
 
     async def create_ctf(self, interaction: discord.Interaction, ctf_name: str, ctftime:str = None):
-        
+
         self.ctf_name = ctf_name
         guild = interaction.guild
         err=None
@@ -243,7 +243,7 @@ class Handler():
             if not is_admin:
                 await interaction.response.send_message(f'Required role ({self.ctfbot.require_role_cmd_name}) for creating CTF not found. Are you sure this role exists?', ephemeral=True)
                 return
-            
+
             can_run = False
             for role in interaction.user.roles:
                 if self.ctfbot.require_role_cmd_name == role.name:
@@ -251,7 +251,7 @@ class Handler():
             if not can_run:
                 await interaction.response.send_message(f'You do not have the required role ({self.ctfbot.require_role_cmd_name}) to create a CTF.', ephemeral=True)
                 return
-            
+
         overwrites = None
         if self.ctfbot.require_role_name:
             active_ctf_role = discord.utils.get(guild.roles, name=self.ctfbot.require_role_name)
@@ -274,7 +274,7 @@ class Handler():
 
         if ctftime:
             informations,err = await get_ctftime_informations(ctftime)
-            information_channel = await guild.create_text_channel("ctf-informations", category=category, overwrites=overwrites)
+            information_channel = await guild.create_text_channel("informations", category=category, overwrites=overwrites)
             if informations:
                 await information_channel.send(informations)
 
@@ -286,12 +286,12 @@ class Handler():
             await interaction.response.send_message(f'CTF {ctf_name} has been created!')
         else:
             await interaction.response.send_message(f'CTF {ctf_name} has been created but errors occured : ERR={err}')
-        
+
         await self.button_command(interaction)
 
 
     async def link_ctftime(self, interaction: discord.Interaction, ctf_name: str, ctftime:str):
-        
+
         guild = interaction.guild
         err=None
 
@@ -300,7 +300,7 @@ class Handler():
             if not is_admin:
                 await interaction.response.send_message(f'Required role ({self.ctfbot.require_role_cmd_name}) for creating CTF channel not found. Are you sure this role exists?', ephemeral=True)
                 return
-            
+
             can_run = False
             for role in interaction.user.roles:
                 if self.ctfbot.require_role_cmd_name == role.name:
@@ -308,7 +308,7 @@ class Handler():
             if not can_run:
                 await interaction.response.send_message(f'You do not have the required role ({self.ctfbot.require_role_cmd_name}) to create/manage a CTF.', ephemeral=True)
                 return
-            
+
         overwrites = None
         if self.ctfbot.require_role_name:
             active_ctf_role = discord.utils.get(guild.roles, name=self.ctfbot.require_role_name)
@@ -325,16 +325,16 @@ class Handler():
         if not category:
             await interaction.response.send_message(f"CTF '{ctf_name}' doesn't exists.")
             return
-        
-        information_channel = discord.utils.get(category.channels, name='ctf-informations')
+
+        information_channel = discord.utils.get(category.channels, name='informations')
         if not information_channel:
-            information_channel = await guild.create_text_channel('ctf-informations', category=category, overwrites=overwrites)
-        
+            information_channel = await guild.create_text_channel('informations', category=category, overwrites=overwrites)
+
         informations,err = await get_ctftime_informations(ctftime)
         if not informations:
             await interaction.response.send_message(f"CTF {ctf_name} couldn't be updated with ctftime informations | err = {err}")
             return
-        
+
         await information_channel.send(informations)
         await interaction.response.send_message(f'CTF {ctf_name} has been updated with ctftime event!')
 
@@ -345,7 +345,7 @@ class Handler():
         if not category:
             await interaction.response.send_message(f'CTF {ctf_name} not found.', ephemeral=True)
             return
-        
+
         tasks = []
         for channel in category.channels:
             tasks.append(asyncio.create_task(channel.delete()))
@@ -361,7 +361,7 @@ class Handler():
         if not category:
             await interaction.response.send_message(f'CTF {ctf_name} not found.', ephemeral=True)
             return
-        
+
         if password != self.ctfbot.ctf_password:
             await interaction.response.send_message('Incorrect password.', ephemeral=True)
             return
@@ -370,11 +370,11 @@ class Handler():
         if not required_role:
             await interaction.response.send_message(f'CTF role ({self.ctfbot.require_role_name}) not found.', ephemeral=True)
             return
-        
+
         if required_role in interaction.user.roles:
             await interaction.response.send_message('You already have the required role.', ephemeral=True)
             return
-        
+
         bot_member = guild.me
         if not bot_member.guild_permissions.manage_roles:
             await interaction.response.send_message('I do not have permission to manage roles.', ephemeral=True)
@@ -400,7 +400,7 @@ class Handler():
             if not is_admin:
                 await interaction.response.send_message(f'Required role ({self.ctfbot.require_role_cmd_name}) for creating CTF not found. Are you sure this role exists?', ephemeral=True)
                 return
-            
+
             can_run = False
             for role in interaction.user.roles:
                 if self.ctfbot.require_role_cmd_name == role.name:
@@ -408,7 +408,7 @@ class Handler():
             if not can_run:
                 await interaction.response.send_message(f'You do not have the required role ({self.ctfbot.require_role_cmd_name}) to create a CTF.', ephemeral=True)
                 return
-            
+
         required_role = discord.utils.get(guild.roles, name=self.ctfbot.require_role_name)
         if not required_role:
             await interaction.response.send_message(f'CTF role ({self.ctfbot.require_role_name}) not found.', ephemeral=True)
