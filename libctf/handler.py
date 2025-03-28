@@ -97,6 +97,14 @@ class Handler():
             await self.ping(interaction)
 
         @self.ctfclient.tree.command(
+            name="solved",
+            description="Change thread to solved state"
+        )
+        @app_commands.describe()
+        async def solved(interaction: discord.Interaction):
+            await self.solved(interaction)
+
+        @self.ctfclient.tree.command(
             name="get_score",
             description="Get a screenshot of a team's page"
         )
@@ -133,6 +141,15 @@ class Handler():
 
     async def ping(self, interaction: discord.Interaction):
         await interaction.response.send_message("I'm up !")
+    
+    async def solved(self, interaction: discord.Interaction):
+        current_channel = interaction.channel
+        new_name = f"Solved-{current_channel.name}"
+        try:
+            await current_channel.edit(name=new_name)
+            await interaction.response.send_message(f"Channel renamed to {new_name}.")
+        except discord.DiscordException as e:
+            await interaction.response.send_message(f"Failed to rename channel: {e}", ephemeral=True)
 
     async def button_command(self, interaction):
         view = ActivateButton(self.ctf_name, self.join_ctf)
