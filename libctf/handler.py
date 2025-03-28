@@ -144,7 +144,7 @@ class Handler():
     
     async def solved(self, interaction: discord.Interaction):
         current_channel = interaction.channel
-        new_name = f"Solved-{current_channel.name}"
+        new_name = f"🚩Solved-{current_channel.name}"
         try:
             await current_channel.edit(name=new_name)
             await interaction.response.send_message(f"Channel renamed to {new_name}.")
